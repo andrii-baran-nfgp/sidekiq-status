@@ -95,17 +95,14 @@ module Sidekiq::Status
       end
 
       app.get '/statuses' do
-
-        jids = Sidekiq::Status.redis_adapter do |conn|
-          conn.scan(match: 'sidekiq:status:*', count: 100).map do |key|
-            key.split(':').last
-          end.uniq
-        end
+        @workers = Set.new(['all'])
+        jids = Sidekiq::WorkSet.new.map {|process_id, thread_id, work|  JSON.parse(work['payload'])['jid'] }
         @statuses = []
 
         jids.each do |jid|
           status = Sidekiq::Status::get_all jid
           next if !status || status.count < 2
+          @workers << status['worker']
           status = add_details_to_status(status)
           @statuses << status
         end
@@ -118,6 +115,10 @@ module Sidekiq::Status
         else
           sort_dir = "desc"
           @statuses = @statuses.sort { |y,x| (x[sort_by] <=> y[sort_by]) || 1 }
+        end
+
+        if params[:worker] && params[:worker] != "all"
+          @statuses = @statuses.select {|job_status| job_status["worker"] == params[:worker] }
         end
 
         if params[:status] && params[:status] != "all"
@@ -183,7 +184,7 @@ unless defined?(Sidekiq::Web)
 end
 
 Sidekiq::Web.register(Sidekiq::Status::Web)
-["per_page", "sort_by", "sort_dir", "status"].each do |key|
+["per_page", "sort_by", "sort_dir", "status", "worker"].each do |key|
   Sidekiq::WebHelpers::SAFE_QPARAMS.push(key)
 end
 if Sidekiq::Web.tabs.is_a?(Array)

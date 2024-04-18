@@ -61,8 +61,8 @@ function setPerPage(select){
     <div class="filter-status">
       Filter Status:
       <select class="form-control" onchange="setPerPage(this)">
-        <% (['all', 'complete', 'failed', 'interrupted', 'queued', 'retrying', 'stopped', 'working']).each do |status| %>
-          <option data-url="?<%= qparams(status: status)%>" value="<%= status %>" <%= 'selected="selected"' if status == (params[:status]) %>><%= status %></option>
+        <% @workers.each do |worker| %>
+          <option data-url="?<%= qparams(worker: worker)%>" value="<%= worker %>" <%= 'selected="selected"' if worker == (params[:worker]) %>><%= worker %></option>
         <% end %>
       </select>
     </div>
