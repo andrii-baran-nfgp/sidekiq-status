@@ -135,11 +135,9 @@ module Sidekiq::Status
         @headers = [
           {id: "worker", name: "Worker / JID", class: nil, url: nil},
           {id: "args", name: "Arguments", class: nil, url: nil},
-          {id: "status", name: "Status", class: nil, url: nil},
           {id: "update_time", name: "Last Updated", class: nil, url: nil},
           {id: "pct_complete", name: "Progress", class: nil, url: nil},
           {id: "elapsed", name: "Time Elapsed", class: nil, url: nil},
-          {id: "eta", name: "ETA", class: nil, url: nil},
         ]
 
         @headers.each do |h|

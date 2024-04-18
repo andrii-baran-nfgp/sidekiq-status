@@ -66,15 +66,6 @@ function setPerPage(select){
         <% end %>
       </select>
     </div>
-
-    <div class="per-page">
-      Per page:
-      <select class="form-control" onchange="setPerPage(this)">
-        <% (Sidekiq::Status::Web.per_page_opts + ['all']).each do |num| %>
-        <option data-url="?<%= qparams(page: 1, per_page: num)%>" value="<%= num %>" <%= 'selected="selected"' if num.to_s == (params[:per_page] || @count) %>><%= num %></option>
-        <% end %>
-      </select>
-    </div>
   </div>
 </div>
 <table class="table table-hover table-bordered table-striped">
@@ -84,9 +75,6 @@ function setPerPage(select){
         <a href="<%= h hdr[:url] %>"><%= h hdr[:name] %></a>
       </th>
     <% end %>
-    <th class="header">
-      Actions
-    </th>
   </tr>
   <% @statuses.each do |container| %>
     <tr>
@@ -95,9 +83,6 @@ function setPerPage(select){
       </td>
       <td>
         <div class='args' title='<%= h container["jid"] %>'><%= h container["args"] %></div>
-      </td>
-      <td style='text-align: center;'>
-        <div class='label label-<%= h container["label"] %>'><%= h container["status"] %></div>
       </td>
       <% secs = Time.now.to_i - container["update_time"].to_i %>
       <td style='text-align: center; white-space: nowrap;' title="<%= Time.at(container["update_time"].to_i) %>">
@@ -123,26 +108,6 @@ function setPerPage(select){
         <% if container["elapsed"] %>
           <%= ChronicDuration.output(container["elapsed"].to_i, :weeks => true, :units => 2) %>
         <% end %>
-      </td>
-      <td style='text-align: center; white-space: nowrap;'>
-        <% if container["eta"] %>
-          <%= ChronicDuration.output(container["eta"].to_i, :weeks => true, :units => 2) %>
-        <% end %>
-      </td>
-      <td>
-        <div class="actions">
-          <form action="statuses" method="post">
-            <input type="hidden" name="jid" value="<%= h container["jid"] %>" />
-            <%= csrf_tag %>
-            <% if container["status"] == "complete" %>
-              <input type="hidden" name="_method" value="delete" />
-              <input type="submit" class="btn btn-danger btn-xs" value="Remove" />
-            <% elsif container["status"] == "failed" %>
-              <input type="hidden" name="_method" value="put" />
-              <input type="submit" class="btn btn-warning btn-xs" value="Retry Now" />
-            <% end %>
-          </form>
-        </div>
       </td>
     </tr>
   <% end %>
