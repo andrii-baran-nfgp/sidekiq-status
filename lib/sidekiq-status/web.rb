@@ -23,6 +23,12 @@ module Sidekiq::Status
       def default_per_page
         @default_per_page || DEFAULT_PER_PAGE
       end
+      def observed_job_list=(val)
+        @observed_job_list = Array(val)
+      end
+      def observed_job_list
+        @observed_job_list || []
+      end
     end
 
     # @param [Sidekiq::Web] app
@@ -101,7 +107,7 @@ module Sidekiq::Status
 
         jids.each do |jid|
           status = Sidekiq::Status::get_all jid
-          next if !status || status.count < 2
+          next if !status || status.count < 2 || Web.observed_job_list.exclude?(status['worker'])
           @workers << status['worker']
           status = add_details_to_status(status)
           @statuses << status
